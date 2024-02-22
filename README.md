@@ -13,7 +13,7 @@ This starts the server
 ## Your Task
 
 Enhance this simple club member index to improve it UI/UX and implement additional functionality currently missing.
-You can install/edit anything you want to accomplish the assigned goals. You have no obligation to use any of the existing components that are provided.
+You can install/edit anything you want to accomplish the assigned goals. You have no obligation to use any of the existing components that are provided. Please accomplish as much of the below as you can within the allotted time.
 
 1. Add the missing create/edit/delete functionality
 2. Allow for filtering using the search bar
