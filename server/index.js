@@ -71,10 +71,6 @@ app.patch('/members/:id', (req, res) => {
   console.log(id, body);
 
   if (body) {
-    if (!body.name) {
-      res.send('Name is required');
-      return;
-    }
     members = members.map(member => {
       if (member.id === id) {
         return { ...member, ...body };
