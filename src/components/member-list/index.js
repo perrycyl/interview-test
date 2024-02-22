@@ -7,7 +7,7 @@ const getData = async setMembers => {
     const res = await axios.get('http://localhost:4444/members');
     setMembers(res.data);
   } catch(err)  {
-    console.log('ERR', err);
+    console.log('ERROR', err);
   }
 };
 
@@ -84,7 +84,6 @@ const MemberList = () => {
   useEffect(() => {
     getData(setMembers);
   }, []);
-  console.log('MEMBERS', members);
 
   return (
     <Block>
