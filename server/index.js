@@ -41,7 +41,6 @@ app.get('/members', (req, res) => {
 app.post('/members', (req, res) => {
   console.log('POST /members');
   const body = req.body.body;
-  console.log(body)
   if (body) {
     if (!body.name) {
       res.send('Name is required');
@@ -68,7 +67,6 @@ app.patch('/members/:id', (req, res) => {
   console.log('PATCH /members');
   const id = req.params.id;
   const body = req.body.body;
-  console.log(id, body);
 
   if (body) {
     members = members.map(member => {
