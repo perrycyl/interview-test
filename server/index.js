@@ -12,7 +12,19 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 
+/**
+ * @params query: string
+ */
 app.get('/members', (req, res) => {
+  const query = req.query.query;
+  if (query) {
+    const q = query.toLowerCase();
+    const filteredMembers = tempMembers.filter(member =>
+      member?.name?.toLowerCase()?.includes(q)
+    );
+    res.send(filteredMembers);
+    return;
+  }
   console.log('GET /members');
   res.send(tempMembers);
 });
