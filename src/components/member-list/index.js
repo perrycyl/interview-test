@@ -65,11 +65,11 @@ export const SearchBar = () => (
   />
 );
 
-export const Row = ({ id, age, name, activities, memberRating }) => (
+export const Row = ({ id, age, name, activities, rating }) => (
   <tr key={id}>
     <Cell>{name}</Cell>
     <Cell>{age}</Cell>
-    <Cell>{memberRating}</Cell>
+    <Cell>{rating}</Cell>
     <Cell>
       {activities.map((activity, i) => (
         <div key={i}>{activity}</div>
