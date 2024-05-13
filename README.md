@@ -38,5 +38,5 @@ The actions being performed (for example CRUD actions, filtering etc.) should be
 
 ## Instructions
 
-1. You can use basic UI library like bootstrap for providing a flexbox based responsive layout.
-2. Rest of the functionality and helper methods should be self implemented or be used from the already provided dependencies in `package.json` file.
+1. You can use basic UI libraries including but not limited to bootstrap for providing a flexbox based responsive layout.
+2. The rest of the functionality and helper methods should be self implemented or be used from the already provided dependencies in `package.json` file.
