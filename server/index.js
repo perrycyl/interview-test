@@ -21,7 +21,7 @@ app.get('/members', (req, res) => {
   const query = req.query.query;
   if (query) {
     const q = query.toLowerCase();
-    const filteredMembers = members.filter(member =>
+    const filteredMembers = members.filter((member) =>
       member?.name?.toLowerCase()?.includes(q)
     );
     console.log('GET filtered /members');
@@ -49,7 +49,7 @@ app.post('/members', (req, res) => {
     members.push({
       id: randomNumber,
       activities: [],
-      ...body
+      ...body,
     });
   }
   res.send(req.body);
@@ -57,7 +57,7 @@ app.post('/members', (req, res) => {
 
 /**
  * @param id: string required
- * 
+ *
  * @body name: string required
  * @body age: integer
  * @body activities: array[string]
@@ -69,7 +69,7 @@ app.patch('/members/:id', (req, res) => {
   const body = req.body.body;
 
   if (body) {
-    members = members.map(member => {
+    members = members.map((member) => {
       if (member.id === id) {
         return { ...member, ...body };
       }
@@ -85,9 +85,9 @@ app.patch('/members/:id', (req, res) => {
 app.delete('/members/:id', (req, res) => {
   console.log('DELETE /members');
   const id = req.params.id;
-  
-  const memberIndex = members.findIndex(member => member.id === id);
-  
+
+  const memberIndex = members.findIndex((member) => member.id === id);
+
   if (memberIndex !== -1) {
     members.splice(memberIndex, 1);
     res.send('Member removed successfully');

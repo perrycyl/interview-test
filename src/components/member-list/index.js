@@ -1,15 +1,56 @@
-import React, { useState, useEffect } from "react";
+import { useDebounce } from '@uidotdev/usehooks';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-const getData = async setMembers => {
+const getData = async (setMembers) => {
   try {
     const res = await axios.get('http://localhost:4444/members');
     setMembers(res.data);
-  } catch(err)  {
+  } catch (err) {
     console.log('ERROR', err);
   }
 };
+
+const DropDownContainer = styled('div')`
+  width: 10.5em;
+  margin: 0 auto;
+  height: 40px;
+`;
+
+const DropDownHeader = styled('div')`
+  margin-bottom: 0.8em;
+  padding: 0.4em 2em 0.4em 1em;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+  font-weight: 200;
+  font-size: 1.1rem;
+  color: black;
+  background: #ffffff;
+`;
+
+const DropDownListContainer = styled('div')`
+  transform: translate(0px, 20px);
+`;
+
+const DropDownList = styled('ul')`
+  padding: 0;
+  margin: 0;
+  padding-left: 1em;
+  background: #ffffff;
+  border: 2px solid #e5e5e5;
+  box-sizing: border-box;
+  color: black;
+  font-size: 1.1rem;
+  font-weight: 200;
+  &:first-child {
+    padding-top: 0.8em;
+  }
+`;
+
+const ListItem = styled('li')`
+  list-style: none;
+  margin-bottom: 0.8em;
+`;
 
 const Block = styled.div`
   display: flex;
@@ -19,14 +60,35 @@ const Block = styled.div`
   padding: 0 5rem;
 `;
 
+const FilterBy = styled.div`
+  display: flex;
+`;
+
+const FilterFor = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  white-space: nowrap;
+`;
+
 const Filters = styled.div`
   display: flex;
+  justify-content: flex-start;
+  width: calc(100% - 10rem);
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
   flex-direction: row;
-  width: 100%;
-  margin: 1rem 0;
-  > input {
-    max-width: 10rem;
-  }
+  width: 40%;
+  padding-right: 6rem;
+`;
+
+const SearchFor = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  white-space: nowrap;
 `;
 
 export const Input = styled.input`
@@ -58,12 +120,40 @@ const Cell = styled.td`
   text-align: center;
 `;
 
-export const SearchBar = () => (
-  <Input
-    type="text"
-    placeholder="Search for a member"
-  />
+export const SearchBar = ({ onChange }) => (
+  <Input type="text" placeholder="filter value" onChange={onChange} />
 );
+export const FilterSelector = ({ currentValue, onClick }) => {
+  const filters = [
+    { name: 'none', value: null },
+    { name: 'rating', value: 'rating' },
+    { name: 'activities', value: 'activities' },
+  ];
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(!isOpen);
+  return (
+    <DropDownContainer>
+      <DropDownHeader onClick={toggle}>{currentValue ?? 'none'}</DropDownHeader>
+      {isOpen && (
+        <DropDownListContainer>
+          <DropDownList>
+            {filters.map((filter, i) => (
+              <ListItem
+                key={`filter-${filter.name}`}
+                onClick={() => {
+                  onClick(filter.value);
+                  setIsOpen(false);
+                }}
+              >
+                {filter.name}
+              </ListItem>
+            ))}
+          </DropDownList>
+        </DropDownListContainer>
+      )}
+    </DropDownContainer>
+  );
+};
 
 export const Row = ({ id, age, name, activities, rating }) => (
   <tr key={id}>
@@ -80,16 +170,64 @@ export const Row = ({ id, age, name, activities, rating }) => (
 
 const MemberList = () => {
   const [members, setMembers] = useState([]);
+  const [filter, setFilter] = useState(null); // null or string
+  const [filterValue, setFilterValue] = useState(''); // empty string or string
+  const [search, setSearch] = useState(''); // empty string or string
+  const [filteredMembers, setFilteredMembers] = useState([]);
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  const onSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const onFilterValueChange = (e) => {
+    setFilterValue(e.target.value);
+  };
 
   useEffect(() => {
     getData(setMembers);
   }, []);
 
+  useEffect(() => {
+    if (debouncedSearch === null) return;
+    axios
+      .get(`http://localhost:4444/members?query=${debouncedSearch}`)
+      .then((res) => setMembers(res.data))
+      .catch((err) => console.log('ERROR', err));
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (!filter || !filterValue) return;
+    // find members that match the filter and set it to setFilteredMembers
+    const filtered = members.filter((member) => {
+      if (filter === 'rating') {
+        return member.rating === parseInt(filterValue);
+      }
+      if (filter === 'activities') {
+        // check if the activities array includes a partial match of the filterValue and if so, return the member
+        return member.activities.some((activity) =>
+          activity.toLowerCase().includes(filterValue.toLowerCase())
+        );
+      }
+      return null;
+    });
+    setFilteredMembers(filtered);
+  }, [filterValue, filter, members]);
+
   return (
     <Block>
       <h1>My Club's Members</h1>
       <Filters>
-        <SearchBar />
+        <SearchContainer>
+          <SearchFor> Search Name: </SearchFor>
+          <SearchBar onChange={onSearchChange} />
+        </SearchContainer>
+        <FilterBy>
+          <FilterFor> Filter by: </FilterFor>
+          <FilterSelector currentValue={filter} onClick={setFilter} />
+          <SearchBar onChange={onFilterValueChange} />
+        </FilterBy>
       </Filters>
       <Table>
         <Thead>
@@ -101,9 +239,11 @@ const MemberList = () => {
           </tr>
         </Thead>
         <tbody>
-          {members.map((member) => (
-            <Row {...member} key={member.id} />
-          ))}
+          {filter && filterValue
+            ? filteredMembers.map((member) => (
+                <Row {...member} key={member.id} />
+              ))
+            : members.map((member) => <Row {...member} key={member.id} />)}
         </tbody>
       </Table>
     </Block>
